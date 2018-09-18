@@ -7,20 +7,46 @@ class SearchPage extends React.Component {
 
   state = {
     books:[],
-    searchTerm:''
+    searchTerm:'',
+    currentBooks:[]
   }
 
   constructor(props) {
     super(props)
     this.handleChange = this.handleChange.bind(this)
+    this.updateShelves = this.updateShelves.bind(this)
   }
+
+  componentWillMount() {
+    console.log("loading books from search!");
+    BooksAPI.getAll().then((apiBooks) => {
+      this.setState({
+        books:[],
+        searchTerm:'',
+        currentBooks:apiBooks
+      });
+    },(err)=>{
+      console.log("Promise Errd");
+    });
+  }
+    updateShelves(books){
+      return books.map(book => {
+        this.state.currentBooks.forEach(function(b){
+          if(book.id === b.id){
+            book.shelf = b.shelf;
+          }
+        })
+        return book;
+      });
+    }
 
   handleChange(e){
     const value = e.target.value;
     if(value === ''){
       this.setState({
         books:[],
-        searchTerm:''
+        searchTerm:'',
+        currentBooks:this.state.currentBooks
       })
     }else{
       BooksAPI.search(value).then((apiBooks) => {
@@ -28,12 +54,15 @@ class SearchPage extends React.Component {
         if('error' in apiBooks){
           this.setState({
             books:[],
-            searchTerm:''
+            searchTerm:'',
+            currentBooks:this.state.currentBooks
           })
         }else{
+          apiBooks = this.updateShelves(apiBooks);
           this.setState({
             books:apiBooks,
-            searchTerm:value
+            searchTerm:value,
+            currentBooks:this.state.currentBooks
           },()=>{
             console.log("State has been set!");
           })
@@ -42,11 +71,13 @@ class SearchPage extends React.Component {
         console.log("no results");
         this.setState({
           books:[],
-          searchTerm:''
+          searchTerm:'',
+          currentBooks:this.state.currentBooks
         })
       })
     }
   }
+
 
   render(){
     return (

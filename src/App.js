@@ -4,7 +4,6 @@ import SearchPage from './components/SearchPage.js'
 import ListBooks from './components/ListBooks.js'
 
 class BooksApp extends React.Component {
-  
   render() {
     return (
       <div className="app">
